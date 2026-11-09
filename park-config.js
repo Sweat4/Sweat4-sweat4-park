@@ -7,10 +7,11 @@ window.APP_CFG = {
   /* ---------- Branding (Platzhalter) ----------
      name/short: App-Name. logoMark/logoFull: eigenes Logo als SVG-Text (oder null = neutraler Platzhalter).
      colors: Akzentfarben (CSS-Werte). Leer lassen = Farben der SWEAT4-App. */
-  name: 'Outdoorpark-App',
-  short: 'Outdoorpark',
-  tagline: 'Training am Outdoor-Rack',
-  logoMark: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" class="logo-mark" role="img" aria-label="Logo-Platzhalter"><rect x="1" y="1" width="118" height="38" rx="9" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4" opacity=".7"/><text x="60" y="25" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="currentColor" opacity=".8">LOGO</text></svg>',
+  name: 'SW4 Park',
+  short: 'SW4 Park',
+  tagline: 'The Outdoor Fitnesspark',
+  logoImg: 'logo.png',     // ganzes Logo (Start, Zugang) – transparentes PNG
+  logoMark: '<img class="logo-mark" src="logo-mark.png" alt="SW4">',   // kleines Zeichen oben links
   logoFull: null,          // null = es wird logoMark verwendet
   colors: { accent: '', accentSoft: '' },
 

@@ -1,7 +1,7 @@
 {
-  "name": "Outdoorpark-App",
-  "short_name": "Outdoorpark",
-  "description": "Training am Sweat4 Outdoor-Rack (Name und Logo folgen)",
+  "name": "SW4 Park – The Outdoor Fitnesspark",
+  "short_name": "SW4 Park",
+  "description": "SWEAT4 PARK – Training am Outdoor-Rack",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

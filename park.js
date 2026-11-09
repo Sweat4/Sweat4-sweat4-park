@@ -30,7 +30,7 @@
     if (C.colors.accent) r.setProperty('--accent', C.colors.accent);
     if (C.colors.accentSoft) r.setProperty('--accent-soft', C.colors.accentSoft);
   }
-  const brand = () => `<div class="park-brand">${C.logoFull || C.logoMark || ''}<div><div class="park-name">${esc(C.name || 'Outdoorpark-App')}</div>${C.tagline ? `<div class="park-tag">${esc(T(C.tagline))}</div>` : ''}</div></div>`;
+  const brand = () => C.logoImg ? `<div class="park-brand park-brand-img"><img src="${esc(C.logoImg)}" alt="${esc(C.name || '')}${C.tagline ? ' – ' + esc(C.tagline) : ''}"></div>` : `<div class="park-brand">${C.logoFull || C.logoMark || ''}<div><div class="park-name">${esc(C.name || 'Outdoorpark-App')}</div>${C.tagline ? `<div class="park-tag">${esc(T(C.tagline))}</div>` : ''}</div></div>`;
 
   /* ---------- Englisch für die neuen Texte ---------- */
   const EN = window.SW_I18N && SW_I18N.en;
@@ -46,7 +46,7 @@
       'Ich habe den {g} und die {d} gelesen.': 'I have read the {g} and the {d}.', 'Gesundheitshinweis': 'Health notice', 'Datenschutzhinweise': 'privacy notice',
       'Profil anlegen': 'Create profile', 'Bitte gib deinen Namen ein.': 'Please enter your name.', 'Bitte bestätige die Hinweise.': 'Please confirm the notices.',
       'Schon ein Backup? Hier importieren': 'Already have a backup? Import it here',
-      'Zugang über: {g}': 'Access via: {g}', 'Willkommen im Outdoorpark': 'Welcome to the outdoor park',
+      'Zugang über: {g}': 'Access via: {g}', 'Willkommen im {p}': 'Welcome to {p}',
       'Du bist in deinem persönlichen Trainingsbereich.': 'You are in your personal training area.', 'Zum Training': 'Go to training',
       'Trainingsprogramme': 'Training programmes', 'Programm auswählen': 'Choose a programme', 'Programm wechseln': 'Change programme', 'Aktives Programm': 'Active programme',
       'Noch kein Programm gewählt': 'No programme chosen yet', 'Empfohlen': 'Recommended',
@@ -252,7 +252,7 @@
     return `<main class="wrap view park-start">${brand()}
       <div class="park-gate">${ic('lock', 16)} ${T('Zugang über: {g}', { g: esc(ParkAccess.gateName(gate)) })}</div>
       <div class="card stack" style="text-align:center"><div style="display:flex;justify-content:center">${avatar(c, 'xl')}</div>
-        <h1 style="font-size:24px">${T('Willkommen im Outdoorpark')}, ${esc((c.name || '').split(/\s+/)[0])}</h1>
+        <h1 style="font-size:24px">${T('Willkommen im {p}', { p: esc(C.short || 'Outdoorpark') })}, ${esc((c.name || '').split(/\s+/)[0])}</h1>
         <p class="muted" style="margin:0">${T('Du bist in deinem persönlichen Trainingsbereich.')}</p>
         <a class="btn btn-primary btn-big" href="#/">${ic('play', 20)} ${T('Zum Training')}</a></div></main>`;
   }
@@ -374,6 +374,8 @@
   /* ---------- Stil ---------- */
   const css = document.createElement('style');
   css.textContent = `
+  .park-brand-img{display:block;margin:22px auto 18px;max-width:340px}.park-brand-img img{display:block;width:100%;height:auto}
+  .brand img.logo-mark{height:26px;width:auto;display:block}
   .park-brand{display:flex;align-items:center;gap:14px;margin:18px 0 16px}.park-brand .logo-mark{height:44px;width:auto;color:var(--accent)}
   .park-name{font-size:22px;font-weight:800;letter-spacing:-.01em}.park-tag{color:var(--muted);font-size:14px}
   .park-gate{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--accent);background:var(--accent-soft);border-radius:12px;padding:8px 12px;margin-bottom:12px}
