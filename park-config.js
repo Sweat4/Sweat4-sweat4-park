@@ -3,6 +3,7 @@
    Hier stehen alle Werte, die du später selbst austauschst. Die übrige App
    muss dafür nicht verändert werden.
    ===================================================================== */
+window.PARK_READY = new Promise(r => { window.__parkReady = r; });   // park.js meldet sich fertig – vorher zeigt die App nichts an
 window.APP_CFG = {
   /* ---------- Branding (Platzhalter) ----------
      name/short: App-Name. logoMark/logoFull: eigenes Logo als SVG-Text (oder null = neutraler Platzhalter).

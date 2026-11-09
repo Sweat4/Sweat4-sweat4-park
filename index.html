@@ -7228,7 +7228,7 @@ setInterval(() => { if (document.hidden || LOCK.locked) return; if (isClientMode
 (async function init() {
   // Offline-Fähigkeit, sobald die App über eine Web-Adresse geöffnet wird
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
-  try { await DB.open(); await loadAll(); if ((S.meta.get('lang') || {}).value !== I18N.cur) put('meta', { id: 'lang', value: I18N.cur }); /* Sprache für Push-Texte im Service Worker */ if (S.meta.get('lock')) { LOCK.init = true; LOCK.locked = !(await sessionRestore()); } render(); setTimeout(pushUpgrade, 3000); }
+  try { await DB.open(); await loadAll(); if ((S.meta.get('lang') || {}).value !== I18N.cur) put('meta', { id: 'lang', value: I18N.cur }); /* Sprache für Push-Texte im Service Worker */ if (S.meta.get('lock')) { LOCK.init = true; LOCK.locked = !(await sessionRestore()); } await (window.PARK_READY || 0); /* PARK: erst rendern, wenn park.js geladen ist */ render(); setTimeout(pushUpgrade, 3000); }
   catch (e) {
     document.getElementById('app').innerHTML = `<main class="wrap"><div class="card" style="margin-top:30px"><h2>Speicher nicht verfügbar</h2>
       <p class="muted">Der Browser erlaubt keine lokale Datenbank (IndexedDB). Häufige Ursachen: privater/Inkognito-Modus oder eine Vorschau-Ansicht. Bitte öffne die Datei direkt in Chrome, Edge, Firefox oder Safari.</p>

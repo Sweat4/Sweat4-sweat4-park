@@ -495,4 +495,5 @@
   .pz-nopay{display:flex;gap:8px;align-items:flex-start;font-size:14px;border:1px dashed var(--border);border-radius:12px;padding:10px 12px;color:var(--muted);width:100%}
   @media (min-width:720px){.pz-subs{grid-template-columns:repeat(3,1fr)}}`;
   document.head.appendChild(css);
+  if (window.__parkReady) window.__parkReady();
 })();
