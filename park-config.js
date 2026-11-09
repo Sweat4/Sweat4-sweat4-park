@@ -15,6 +15,26 @@ window.APP_CFG = {
   logoFull: null,          // null = es wird logoMark verwendet
   colors: { accent: '', accentSoft: '' },
 
+  /* ---------- Preise (EINZIGE Stelle für alle Preisangaben in der App) ----------
+     Beträge in Euro. Startseite, Preisseite und Detailansichten lesen nur von hier.
+     checkout: Adresse des Zahlungsanbieters für dieses Produkt – null = noch nicht angebunden.
+     Solange checkout null ist, zeigt die App die Details, aber KEINEN Abschluss-Button.
+     terms: Vertragsbedingungen (Laufzeit, Kündigung, Verfall der Stunden …) – leer = „werden ergänzt“.
+     Es werden keine Bedingungen erfunden. */
+  prices: {
+    currency: 'EUR',
+    single: { perHour: 7.99, extraBlockMin: 15, extraBlock: 1.49, checkout: null },
+    subs: [
+      { id: 'start',  name: 'SWEAT4 START',  perMonth: 29.90, hours: 4,  checkout: null, terms: [] },
+      { id: 'active', name: 'SWEAT4 ACTIVE', perMonth: 54.90, hours: 8,  checkout: null, terms: [], popular: true },
+      { id: 'pro',    name: 'SWEAT4 PRO',    perMonth: 74.90, hours: 12, checkout: null, terms: [] }
+    ],
+    cards: [
+      { id: 'h10', hours: 10, price: 69.90,  checkout: null, terms: [] },
+      { id: 'h20', hours: 20, price: 129.90, checkout: null, terms: [] }
+    ]
+  },
+
   /* ---------- Daten (getrennt von der SWEAT4-Trainer-App) ---------- */
   dbName: 'sweat4-park',
   appId: 'sweat4-park',

@@ -73,6 +73,16 @@
       'Zugang & Park': 'Access & park', 'QR-Zugang': 'QR access',
       'Die App öffnet sich über den QR-Code an der Drehtür. Eine Verbindung zur Zugangskontrolle besteht noch nicht – die App öffnet keine Tür.': 'The app opens via the QR code at the turnstile. There is no connection to the access control yet – the app does not open any door.',
       'Diese Datei ist keine Sicherung dieser App.': 'This file is not a backup of this app.', 'Sicherung einspielen?': 'Restore backup?', 'Sicherung vom {d} mit {n} Trainings. Die Daten auf diesem Handy werden dadurch ersetzt.': 'Backup from {d} with {n} workouts. The data on this phone will be replaced.', 'Einspielen': 'Restore', 'Sicherung eingespielt ✓': 'Backup restored ✓',
+      'Jetzt trainieren': 'Train now', 'Stunde': 'hour', 'Monat': 'month', 'Jede weitere angefangene {m} Minuten: {p}': 'Each additional {m} minutes or part thereof: {p}', 'Ohne Abo · ohne Vertrag': 'No membership · no contract',
+      'QR-Code scannen & starten': 'Scan QR code & start', 'Regelmäßig trainieren?': 'Training regularly?', 'Mit unseren Abos trainierst du günstiger und sicherst dir dein persönliches Stundenkontingent.': 'With our memberships you train for less and secure your personal hour allowance.',
+      'Beliebteste Wahl': 'Most popular', '{n} Trainingsstunden inklusive': '{n} training hours included', 'entspricht {p} pro Stunde': 'equals {p} per hour', 'Abo auswählen': 'Choose membership',
+      'Flexibel trainieren – ohne Abo': 'Train flexibly – no membership', '{n} Stunden': '{n} hours', 'Stundenkarte kaufen': 'Buy hour pass', 'Stundenkarte · {n} Stunden': 'Hour pass · {n} hours',
+      'Preis': 'Price', 'Enthalten': 'Included', 'Pro Stunde': 'Per hour', '{n} Trainingsstunden pro Monat': '{n} training hours per month', '{n} Trainingsstunden': '{n} training hours',
+      'Vertragsdetails & Zahlungsbedingungen': 'Contract details & payment terms', 'Die Vertrags- und Zahlungsbedingungen werden noch ergänzt.': 'The contract and payment terms will be added.',
+      'Ich habe die Vertragsdetails und Zahlungsbedingungen gelesen.': 'I have read the contract details and payment terms.', 'Kostenpflichtig abschließen': 'Buy now (paid)', 'Bitte bestätige die Vertragsdetails.': 'Please confirm the contract details.',
+      'Online-Abschluss ist noch nicht verfügbar. Bitte wende dich direkt an SWEAT4.': 'Online purchase is not available yet. Please contact SWEAT4 directly.', 'Die Bezahlung an der Drehtür ist noch nicht angebunden.': 'Payment at the turnstile is not connected yet.',
+      'Öffne die Kamera deines Handys.': 'Open your phone camera.', 'Scanne den QR-Code an der Drehtür.': 'Scan the QR code at the turnstile.', 'Die App öffnet sich – du startest dein Training.': 'The app opens – you start your workout.',
+      'Einzelzugang': 'Single access', 'Jede weitere angefangene {m} Minuten': 'Each additional {m} minutes or part', 'Preise & Abos': 'Prices & memberships',
       'Einstellungen': 'Settings', 'Dein Training': 'Your training', 'Deine Entwicklung': 'Your progress', 'Im Park': 'In the park'
     });
   }
@@ -215,6 +225,64 @@
     if (g) { history.replaceState(null, '', location.pathname + '#/zugang/' + encodeURIComponent(g)); }
   } catch (e) {}
 
+  /* ---------- Preise & Zugang (alle Beträge aus APP_CFG.prices) ---------- */
+  const PR = C.prices || { single: {}, subs: [], cards: [] };
+  const eur = v => new Intl.NumberFormat(LOC(), { style: 'currency', currency: PR.currency || 'EUR' }).format(v);
+  // Preis für eine Trainingsdauer in Minuten (erste Stunde + jede angefangene Zusatz-Einheit) – Grundlage für eine spätere Abrechnung
+  window.ParkPrice = {
+    single(min) { const s = PR.single; if (!(min > 0)) return 0; const extra = Math.max(0, min - 60); return Math.round((s.perHour + Math.ceil(extra / s.extraBlockMin) * s.extraBlock) * 100) / 100; },
+    perHour: x => Math.round((x.perMonth || x.price) / x.hours * 100) / 100,
+    find: id => PR.subs.find(x => x.id === id) || PR.cards.find(x => x.id === id) || (id === 'single' ? Object.assign({ id: 'single' }, PR.single) : null)
+  };
+  function PriceBlock() {
+    const s = PR.single;
+    return `<section class="pz">
+      <div class="pz-hero">
+        <div class="pz-eyebrow">${T('Jetzt trainieren')}</div>
+        <div class="pz-big">${eur(s.perHour)}<span> / ${T('Stunde')}</span></div>
+        <div class="pz-sub">${T('Jede weitere angefangene {m} Minuten: {p}', { m: s.extraBlockMin, p: eur(s.extraBlock) })}</div>
+        <div class="pz-note">${T('Ohne Abo · ohne Vertrag')}</div>
+        <button class="btn pz-cta" data-action="pz-qr">${ic('lock', 20)} ${T('QR-Code scannen & starten')}</button>
+      </div>
+      <div class="pz-h"><h2>${T('Regelmäßig trainieren?')}</h2><p>${T('Mit unseren Abos trainierst du günstiger und sicherst dir dein persönliches Stundenkontingent.')}</p></div>
+      <div class="pz-subs">${PR.subs.map(x => `<div class="pz-card ${x.popular ? 'pop' : ''}">${x.popular ? `<div class="pz-badge">${T('Beliebteste Wahl')}</div>` : ''}
+        <div class="pz-name">${esc(x.name)}</div><div class="pz-price">${eur(x.perMonth)}<span> / ${T('Monat')}</span></div>
+        <div class="pz-incl">${ic('check', 16)} ${T('{n} Trainingsstunden inklusive', { n: x.hours })}</div>
+        <div class="pz-ph">${T('entspricht {p} pro Stunde', { p: eur(ParkPrice.perHour(x)) })}</div>
+        <button class="btn ${x.popular ? 'btn-primary' : 'btn-ghost'} btn-block" data-action="pz-pick" data-id="${x.id}">${T('Abo auswählen')}</button></div>`).join('')}</div>
+      <div class="pz-h"><h2>${T('Flexibel trainieren – ohne Abo')}</h2></div>
+      <div class="pz-cards">${PR.cards.map(x => `<button class="pz-row" data-action="pz-pick" data-id="${x.id}"><span class="grow"><b>${T('{n} Stunden', { n: x.hours })}</b><small>${T('entspricht {p} pro Stunde', { p: eur(ParkPrice.perHour(x)) })}</small></span><span class="pz-rp">${eur(x.price)}</span></button>`).join('')}
+        <button class="btn btn-ghost btn-block" data-action="pz-cards">${T('Stundenkarte kaufen')}</button></div>
+    </section>`;
+  }
+  const NOPAY = () => `<div class="pz-nopay">${ic('info', 16)} ${T('Online-Abschluss ist noch nicht verfügbar. Bitte wende dich direkt an SWEAT4.')}</div>`;
+  function pzDetail(id) {
+    const x = ParkPrice.find(id); if (!x) return;
+    const sub = !!x.perMonth, title = sub ? x.name : T('Stundenkarte · {n} Stunden', { n: x.hours });
+    const rows = sub ? [[T('Preis'), `${eur(x.perMonth)} / ${T('Monat')}`], [T('Enthalten'), T('{n} Trainingsstunden pro Monat', { n: x.hours })], [T('Pro Stunde'), eur(ParkPrice.perHour(x))]]
+      : [[T('Preis'), eur(x.price)], [T('Enthalten'), T('{n} Trainingsstunden', { n: x.hours })], [T('Pro Stunde'), eur(ParkPrice.perHour(x))]];
+    modal(esc(title), `<div class="pz-dl">${rows.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join('')}</div>
+      <div class="section-h" style="margin-top:14px"><h2>${T('Vertragsdetails & Zahlungsbedingungen')}</h2></div>
+      ${x.terms && x.terms.length ? `<ul class="pz-terms">${x.terms.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : `<p class="muted" style="margin:0">${T('Die Vertrags- und Zahlungsbedingungen werden noch ergänzt.')}</p>`}
+      <div class="sheet-actions">${x.checkout && x.terms && x.terms.length
+        ? `<label class="park-check"><input type="checkbox" id="pz-ok"> <span>${T('Ich habe die Vertragsdetails und Zahlungsbedingungen gelesen.')}</span></label><button class="btn btn-primary btn-block" data-action="pz-buy" data-id="${x.id}">${T('Kostenpflichtig abschließen')}</button>`
+        : NOPAY()}</div>`);
+  }
+  A['pz-pick'] = el => pzDetail(el.dataset.id);
+  A['pz-cards'] = () => modal(T('Stundenkarte kaufen'), `<div class="pick-list">${PR.cards.map(x => `<button class="day-btn" data-action="pz-pick" data-id="${x.id}"><span class="grow"><span class="day-name">${T('{n} Stunden', { n: x.hours })}</span></span><b>${eur(x.price)}</b></button>`).join('')}</div>`);
+  A['pz-buy'] = el => {
+    const x = ParkPrice.find(el.dataset.id); if (!x || !x.checkout) return;
+    if (!document.getElementById('pz-ok').checked) return toast(T('Bitte bestätige die Vertragsdetails.'));
+    location.href = x.checkout;   // Weiterleitung zum Zahlungsanbieter (erst aktiv, wenn in park-config.js eingetragen)
+  };
+  A['pz-qr'] = () => {
+    const s = PR.single;
+    modal(T('QR-Code scannen & starten'), `<ol class="pz-steps"><li>${T('Öffne die Kamera deines Handys.')}</li><li>${T('Scanne den QR-Code an der Drehtür.')}</li><li>${T('Die App öffnet sich – du startest dein Training.')}</li></ol>
+      <div class="pz-dl"><div><span>${T('Einzelzugang')}</span><b>${eur(s.perHour)} / ${T('Stunde')}</b></div><div><span>${T('Jede weitere angefangene {m} Minuten', { m: s.extraBlockMin })}</span><b>${eur(s.extraBlock)}</b></div></div>
+      ${s.checkout ? '' : NOPAY().replace(T('Online-Abschluss ist noch nicht verfügbar. Bitte wende dich direkt an SWEAT4.'), T('Die Bezahlung an der Drehtür ist noch nicht angebunden.'))}`);
+  };
+  window.PriceBlock = PriceBlock;
+
   /* ---------- Profil anlegen (ohne Konto) ---------- */
   const fieldRow = (c = {}) => `
     <label class="field"><span>${T('Name')} *</span><input id="pk-name" maxlength="40" autocomplete="given-name" value="${esc(c.name || '')}" placeholder="${T('Vorname oder Spitzname')}"></label>
@@ -224,6 +292,7 @@
   function viewParkStart(gate) {
     return `<main class="wrap view park-start">
       ${brand()}
+      ${gate ? '' : PriceBlock()}
       ${gate ? `<div class="park-gate">${ic('lock', 16)} ${T('Zugang über: {g}', { g: esc(ParkAccess.gateName(gate)) })}</div>` : ''}
       <div class="card stack">
         <h2 style="font-size:20px">${T('Dein Profil anlegen')}</h2>
@@ -288,6 +357,7 @@
     const done = sessionsOf(cid, true), last = done[0], next = nextDay(cid), active = activeSession(cid), days = clientDays(cid);
     const plan = planOf(cid), prog = plan && plan.templateId && SWEAT4_SYSTEM.find(t => t.id === plan.templateId), first = (c.name || '').trim().split(/\s+/)[0];
     return topbar({ title: esc(C.short || C.name || 'Outdoorpark'), sub: T('Mein Training'), right: `<a class="icon-btn" href="#/data" aria-label="${T('Einstellungen')}">${ic('settings', 22)}</a>` }) + `<main class="wrap view">
+      ${PriceBlock()}
       <div class="hero">${avatar(c, 'xl')}<div class="grow"><h1>${T('Willkommen zurück, {n}', { n: esc(first) })} 👋</h1>${c.goals ? `<div class="muted" style="margin-top:4px">🎯 ${esc(c.goals)}</div>` : ''}</div></div>
       <a class="card park-prog tap" href="#/programme">${ic('list', 22)}<div class="grow"><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.08em">${T('Aktives Programm')}</div>
         <b>${prog ? esc(T(progMeta(prog).who)) + ' · ' + esc(T(progMeta(prog).goal)) : T('Noch kein Programm gewählt')}</b></div><span class="btn btn-sm ${prog ? 'btn-ghost' : 'btn-primary'}">${prog ? T('Programm wechseln') : T('Programm auswählen')}</span></a>
@@ -362,9 +432,10 @@
   /* ---------- Routen ---------- */
   const _routeExtra = routeExtra;
   window.routeExtra = function (p) {
-    if (!isClientMode()) return p[0] === 'rechtliches' ? _routeExtra(p) : viewParkStart(p[0] === 'zugang' ? decodeURIComponent(p[1] || '') : '');
+    if (!isClientMode()) return p[0] === 'rechtliches' ? _routeExtra(p) : p[0] === 'preise' ? topbar({ back: '/', title: T('Preise & Abos') }) + `<main class="wrap view">${PriceBlock()}</main>` : viewParkStart(p[0] === 'zugang' ? decodeURIComponent(p[1] || '') : '');
     if (p[0] === 'zugang') return viewParkGate(decodeURIComponent(p[1] || ''));
     if (p[0] === 'programme') return viewPrograms();
+    if (p[0] === 'preise') return topbar({ back: '/', title: T('Preise & Abos') }) + `<main class="wrap view">${PriceBlock()}</main>`;
     if (p[0] === 'rack') return viewRack(p[1] || '');
     if (['nachrichten', 'mitteilungen', 'zyklus', 'meldungen', 'kunde-setup'].includes(p[0])) return null;   // Trainer-/Betreuungsfunktionen gibt es hier nicht
     if (p[0] === 'client' && ['food', 'fragebogen', 'foto', 'lauf', 'body', 'check'].includes(p[2])) return null;
@@ -400,6 +471,28 @@
   .park-zone{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:2px solid var(--border);border-radius:14px;background:rgba(127,127,127,.06);color:var(--text,#eee);text-decoration:none;transition:background .15s,border-color .15s}
   .park-zone b{font-size:22px;color:var(--accent)}.park-zone span{font-size:12px;color:var(--muted)}
   .park-zone.on,.park-zone:hover{border-color:var(--accent);background:var(--accent-soft)}
-  .kat-figrow{display:none!important}`;
+  .kat-figrow{display:none!important}
+  .pz{margin:4px 0 22px}
+  .pz-hero{position:relative;border-radius:22px;padding:22px 20px 20px;background:linear-gradient(150deg,#d4b074,#be9b5c 55%,#9c7c45);color:#111;box-shadow:0 10px 30px rgba(190,155,92,.25)}
+  .pz-eyebrow{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+  .pz-big{font-size:46px;font-weight:900;letter-spacing:-.02em;line-height:1.05;margin-top:6px}.pz-big span{font-size:20px;font-weight:700}
+  .pz-sub{font-size:15px;font-weight:600;margin-top:6px}.pz-note{font-size:13px;opacity:.75;margin-top:2px}
+  .pz-cta{margin-top:16px;width:100%;min-height:56px;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;background:#111!important;color:#f3e3c4!important;border:0;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:10px}
+  .pz-h{margin:26px 0 12px}.pz-h h2{font-size:18px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:0}.pz-h p{margin:6px 0 0;color:var(--muted);font-size:14px}
+  .pz-subs{display:grid;gap:12px}
+  .pz-card{position:relative;border:1px solid var(--border);border-radius:18px;padding:18px;background:var(--surface)}
+  .pz-card.pop{border:2px solid var(--accent);padding-top:24px;box-shadow:0 0 0 4px var(--accent-soft)}
+  .pz-badge{position:absolute;top:-12px;left:18px;background:var(--accent);color:#111;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 10px}
+  .pz-name{font-size:14px;font-weight:800;letter-spacing:.1em;color:var(--accent)}
+  .pz-price{font-size:32px;font-weight:900;margin:4px 0 8px;letter-spacing:-.01em}.pz-price span{font-size:15px;font-weight:600;color:var(--muted)}
+  .pz-incl{display:flex;gap:8px;align-items:center;font-size:15px;font-weight:600}.pz-incl svg{color:var(--accent)}
+  .pz-ph{font-size:13px;color:var(--muted);margin:4px 0 14px}
+  .pz-cards{display:grid;gap:10px}
+  .pz-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--border);border-radius:16px;padding:14px 16px;background:var(--surface);color:inherit;font:inherit;cursor:pointer}
+  .pz-row b{font-size:17px;display:block}.pz-row small{color:var(--muted);font-size:13px}.pz-rp{font-size:24px;font-weight:900}
+  .pz-dl{display:grid;gap:8px;margin:4px 0}.pz-dl div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);padding:8px 0;font-size:15px}.pz-dl span{color:var(--muted)}
+  .pz-terms{margin:0;padding-left:18px;line-height:1.5}.pz-steps{margin:0 0 12px;padding-left:20px;line-height:1.7}
+  .pz-nopay{display:flex;gap:8px;align-items:flex-start;font-size:14px;border:1px dashed var(--border);border-radius:12px;padding:10px 12px;color:var(--muted);width:100%}
+  @media (min-width:720px){.pz-subs{grid-template-columns:repeat(3,1fr)}}`;
   document.head.appendChild(css);
 })();
