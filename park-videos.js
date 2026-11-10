@@ -15,5 +15,5 @@
    ===================================================================== */
 window.PARK_VIDEOS = {
   // Präsentations-Video: mit KI erstellt (Runway), Hinweis wird angezeigt
-  'tbar-schulterdruecken': { file: 'tbar-schulterdruecken.mp4', src: 'videos/tbar-schulterdruecken.mp4', poster: 'videos/tbar-schulterdruecken.jpg', orientation: 'portrait', ai: true },
+  'tbar-schulterdruecken': { file: 'tbar-schulterdruecken.mp4', src: 'tbar-schulterdruecken.mp4', poster: 'tbar-schulterdruecken.jpg', orientation: 'portrait', ai: true },
 };
