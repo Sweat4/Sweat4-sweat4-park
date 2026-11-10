@@ -6,6 +6,7 @@
      src          Video-Pfad oder -URL (z. B. 'videos/brust-1.mp4' oder https://…)
      poster       Vorschaubild (z. B. 'videos/brust-1.jpg') – optional
      orientation  'portrait' (Hochformat) | 'landscape' (Querformat) – optional, sonst automatisch
+     ai           true = mit KI erstellt → die App zeigt den Hinweis „Mit KI erstellt“
 
    Beispiel:
      'ph-brust-1': { file: 'brust-1.mp4', src: 'videos/brust-1.mp4', poster: 'videos/brust-1.jpg', orientation: 'portrait' },
@@ -13,5 +14,6 @@
    Solange src leer ist, zeigt die App einen neutralen Platzhalter „Video folgt“.
    ===================================================================== */
 window.PARK_VIDEOS = {
-  // noch keine Videos hinterlegt
+  // Präsentations-Video: mit KI erstellt (Runway), Hinweis wird angezeigt
+  'tbar-schulterdruecken': { file: 'tbar-schulterdruecken.mp4', src: 'videos/tbar-schulterdruecken.mp4', poster: 'videos/tbar-schulterdruecken.jpg', orientation: 'portrait', ai: true },
 };

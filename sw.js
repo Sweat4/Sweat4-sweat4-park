@@ -1,8 +1,8 @@
 // OUTDOORPARK-APP – Offline-Cache. Bei Updates VERSION erhöhen.
 // Getrennt von der SWEAT4-Trainer-App: eigener Cache-Name, es werden NUR eigene Caches (Präfix 'sweat4-park-') gelöscht.
 const PREFIX = 'sweat4-park-';
-const VERSION = PREFIX + 'v4';
-const FILES = ['./', 'index.html', 'manifest.webmanifest', 'park-config.js', 'park-katalog.js', 'park-videos.js', 'park.js', 'logo.png', 'logo-mark.png', 'lebensmittel.js', 'sprache-en.js', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
+const VERSION = PREFIX + 'v6';
+const FILES = ['./', 'index.html', 'manifest.webmanifest', 'park-config.js', 'park-katalog.js', 'park-videos.js', 'park.js', 'park-demo3d.js', 'park-demos.js', 'park-rack3d.js', 'uebungen3d.js', 'three.min.js', 'sw4-logo-gold.png', 'rack-vorschau.jpg', 'logo.png', 'logo-mark.png', 'lebensmittel.js', 'sprache-en.js', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => Promise.all(FILES.map(f => c.add(f).catch(() => null)))).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith(PREFIX) && k !== VERSION && k !== PREFIX + 'thumbs').map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {

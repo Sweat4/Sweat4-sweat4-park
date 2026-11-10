@@ -84,3 +84,23 @@ Laufen beide Apps unter derselben Adresse `sweat4.github.io`, sind die **Daten**
 Datenbank, eigene Speicher-Schlüssel). Den **Offline-Zwischenspeicher** räumt die SWEAT4-App bei ihren Updates
 allerdings komplett auf (so ist ihr bestehender Service Worker gebaut). Die Park-App lädt ihn dann einfach neu,
 solange Internet da ist. Saubere Lösung später: eigene Domain/Subdomain für die Park-App.
+
+## 3D-Vorführung am Rack
+
+Wählt man eine Übung mit Vorführung aus, öffnet sich automatisch die Rack-Szene: Die App-Figur läuft
+zum Rack, stellt sich an die richtige Stelle und führt die Übung vor. Bedienung: Start/Pause,
+Erneut abspielen, Schleife, Zur Übungsbeschreibung. Ziehen dreht die Ansicht, zwei Finger zoomen.
+
+Dateien:
+- `park-rack3d.js` – die Rack-Zeichnung (unveränderte Geometrie der Rack-Visualisierung, 2,30 m, Barren 60 cm)
+- `park-demo3d.js` – Engine: Szene, Figur, Zeitachse, Steuerung (muss für neue Übungen nicht geändert werden)
+- `park-demos.js` – eine Definition pro Übung (Rack-Position, Ausgangsposition, Bewegungsablauf, Wiederholungen)
+- `uebungen3d.js`, `three.min.js` – vorhandene 3D-Figur und three.js; werden erst beim Öffnen geladen
+
+Erste Übung: **Front-Kniebeuge mit der T-Bar** (`tbar-front-squat`, linke T-Bar-Halterung).
+
+**Neue Übung hinzufügen:**
+1. In `park-katalog.js` die Übung anlegen (Name, Muskeln, Texte) und `demo3d: true` setzen.
+2. In `park-demos.js` den Eintrag der T-Bar-Kniebeuge kopieren, `id` gleich setzen, `station`
+   (z. B. `'tbarR'`), `setup` und die Phasen anpassen.
+3. In `sw.js` die Version erhöhen.

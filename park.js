@@ -83,7 +83,18 @@
       'Online-Abschluss ist noch nicht verfügbar. Bitte wende dich direkt an SWEAT4.': 'Online purchase is not available yet. Please contact SWEAT4 directly.', 'Die Bezahlung an der Drehtür ist noch nicht angebunden.': 'Payment at the turnstile is not connected yet.',
       'Öffne die Kamera deines Handys.': 'Open your phone camera.', 'Scanne den QR-Code an der Drehtür.': 'Scan the QR code at the turnstile.', 'Die App öffnet sich – du startest dein Training.': 'The app opens – you start your workout.',
       'Einzelzugang': 'Single access', 'Jede weitere angefangene {m} Minuten': 'Each additional {m} minutes or part', 'Preise & Abos': 'Prices & memberships',
-      'Einstellungen': 'Settings', 'Dein Training': 'Your training', 'Deine Entwicklung': 'Your progress', 'Im Park': 'In the park'
+      'Einstellungen': 'Settings', 'Dein Training': 'Your training', 'Deine Entwicklung': 'Your progress', 'Im Park': 'In the park',
+      '3D-Vorführung': '3D demo', '3D-Vorführung am Sweat4 Rack': '3D demo at the Sweat4 rack', '3D am Rack': '3D at the rack', '3D-Vorführung starten': 'Start 3D demo',
+      'Die Figur läuft zum Rack und zeigt dir die Übung direkt an der T-Bar.': 'The figure walks to the rack and demonstrates the exercise right at the T-bar.',
+      '3D-Vorführung wird geladen …': 'Loading 3D demo …', 'Zur Übungsbeschreibung': 'Back to description', 'Ziehen zum Drehen · zwei Finger zum Zoomen': 'Drag to rotate · pinch to zoom',
+      'Pause': 'Pause', 'Start': 'Start', 'Nochmal': 'Again', 'Erneut abspielen': 'Replay', 'Schleife': 'Loop', 'Animation starten': 'Start animation', 'Animation pausieren': 'Pause animation', 'Wiederholung {n}': 'Rep {n}',
+      '3D wird auf diesem Gerät nicht unterstützt.': '3D is not supported on this device.', 'Die Übungsbeschreibung steht dir weiterhin zur Verfügung.': 'The exercise description is still available.', 'Die 3D-Vorführung konnte nicht geladen werden.': 'The 3D demo could not be loaded.',
+      'Front-Kniebeuge mit der T-Bar': 'T-bar front squat', 'Schulterdrücken an der T-Bar': 'T-bar shoulder press', 'Das Sweat4 Rack': 'The Sweat4 rack', '3D · zum Drehen wischen': '3D · swipe to rotate', '3D-Visualisierung des geplanten Racks': '3D visualisation of the planned rack', 'Übungen am Rack': 'Exercises at the rack', 'Mit KI erstellt': 'Made with AI', 'T-Bar · Sweat4 Rack': 'T-bar · Sweat4 rack', 'Startposition': 'Starting position', 'Zum Rack laufen': 'Walk to the rack',
+      'Vor die T-Bar stellen und das Stangenende greifen': 'Stand in front of the T-bar and grip the end of the bar', 'T-Bar mit geradem Rücken anheben': 'Lift the T-bar with a straight back',
+      'Einen kleinen Schritt näher an die T-Bar': 'Take a small step closer to the T-bar', 'Ausgangsposition: T-Bar vor der Brust, Bauch fest': 'Starting position: T-bar in front of the chest, core tight',
+      'Füße schulterbreit, Zehen leicht nach außen, Oberkörper aufrecht': 'Feet shoulder-width, toes slightly out, torso upright', 'Kontrolliert nach unten: Hüfte und Knie beugen': 'Lower under control: bend hips and knees',
+      'Tiefster Punkt: Fersen am Boden, Knie Richtung Fußspitzen': 'Bottom: heels down, knees towards the toes', 'Kraftvoll und sauber nach oben': 'Drive up powerfully and cleanly',
+      'Oben ganz aufrichten – Bauch fest': 'Stand fully upright at the top – core tight', 'Aufrechte Ausgangsposition': 'Upright starting position'
     });
   }
 
@@ -156,8 +167,10 @@
   /* ---------- Vorschaubild: Poster des echten Videos oder neutraler Platzhalter ---------- */
   window.PARK_PREVIEW = (id, cls = '') => {
     const v = vid(id);
-    if (v && v.poster) return `<div class="xprev ${cls}"><img class="park-poster" src="${esc(v.poster)}" alt="" loading="lazy"></div>`;
-    if (v) return `<div class="xprev xprev-video ${cls}"><span class="xprev-ph" aria-hidden="true">${ic('play', 26)}</span></div>`;
+    const aiTag = v && v.ai ? `<span class="park-ai">${T('Mit KI erstellt')}</span>` : '';
+    if (v && v.poster) return `<div class="xprev ${cls}"><img class="park-poster" src="${esc(v.poster)}" alt="" loading="lazy">${aiTag}</div>`;
+    if (v) return `<div class="xprev xprev-video ${cls}"><span class="xprev-ph" aria-hidden="true">${ic('play', 26)}</span>${aiTag}</div>`;
+    if (hasDemo(id)) return `<div class="xprev park-novid park-has3d ${cls}"><span class="xprev-ph" aria-hidden="true">${ic('cube', 26)}</span><span class="park-novid-t">${T('3D am Rack')}</span></div>`;
     return `<div class="xprev park-novid ${cls}"><span class="xprev-ph" aria-hidden="true">${ic('dumbbell', 26)}</span><span class="park-novid-t">${T('Video folgt')}</span></div>`;
   };
   window.ExerciseCard = function (e0) {
@@ -179,8 +192,28 @@
   };
   window.mountDetail3D = function () {};   // keine 3D-Animationen in dieser App
 
+  /* ---------- 3D-Vorführung am Rack (park-demo3d.js / park-demos.js) ----------
+     Übungen mit Vorführung zeigen im Kopf eine Startkarte; beim Auswählen der Übung
+     öffnet sich die Vorführung automatisch (einmal pro Aufruf), „Zur Übungsbeschreibung“ schließt sie. */
+  const hasDemo = id => !!(window.ParkDemo && ParkDemo.has(id));
+  let demoAuto = null;
+  window.addEventListener('hashchange', () => { if (!/^#\/uebung\//.test(location.hash)) demoAuto = null; });
+  A['park-demo'] = el => { if (hasDemo(el.dataset.id)) ParkDemo.open(el.dataset.id, { fig: 'w' }); };
+  function mountDemoCard(id) {
+    const host = document.getElementById('ud-vstage'); if (!host) return false;
+    host.classList.add('park-vstage');
+    host.innerHTML = `<button class="park-demo-card" data-action="park-demo" data-id="${esc(id)}" aria-label="${T('3D-Vorführung starten')}">
+      <span class="park-demo-ic">${ic('cube', 34)}</span><b>${T('3D-Vorführung am Sweat4 Rack')}</b>
+      <span>${T('Die Figur läuft zum Rack und zeigt dir die Übung direkt an der T-Bar.')}</span>
+      <span class="park-demo-go">${ic('play', 16)} ${T('3D-Vorführung starten')}</span></button>`;
+    const b = document.getElementById('ud-play'); if (b) b.hidden = true;
+    if (demoAuto !== id) { demoAuto = id; ParkDemo.open(id, { fig: 'w' }); }
+    return true;
+  }
+
   /* ---------- Video-Komponente ---------- */
   window.mountDetailVideo = function (id) {
+    if (hasDemo(id) && mountDemoCard(id)) return;
     const host = document.getElementById('ud-vstage'); if (!host) return;
     const v = vid(id), b = document.getElementById('ud-play');
     host.classList.add('park-vstage');
@@ -189,7 +222,7 @@
       if (b) b.hidden = true; return;
     }
     const ori = v.orientation === 'landscape' || v.orientation === 'portrait' ? v.orientation : '';
-    host.innerHTML = `<video class="ud-video park-video" id="ud-video" src="${esc(v.src)}" ${v.poster ? `poster="${esc(v.poster)}"` : ''} playsinline loop muted controls preload="metadata" aria-label="${T('Übungsvideo')}"></video>`;
+    host.innerHTML = `<video class="ud-video park-video" id="ud-video" src="${esc(v.src)}" ${v.poster ? `poster="${esc(v.poster)}"` : ''} playsinline loop muted controls preload="metadata" aria-label="${T('Übungsvideo')}"></video>${v.ai ? `<span class="park-ai park-ai-lg">${T('Mit KI erstellt')}</span>` : ''}`;
     const hero = host.closest('.ud-hero');
     const setOri = o => { host.dataset.ori = o; if (hero) { hero.classList.remove('park-ori-portrait', 'park-ori-landscape'); hero.classList.add('park-ori-' + o); } };
     if (ori) setOri(ori);
@@ -328,8 +361,20 @@
   function viewPrograms() {
     const cid = roleInfo().clientId, plan = planOf(cid);
     return topbar({ back: '/', title: T('Trainingsprogramme'), sub: esc(C.name || '') }) + `<main class="wrap view">
+      ${RackShowcase()}
       <p class="muted" style="margin:0 0 14px">${T('Vier fertige Programme für das Outdoor-Rack. Die Übungen sind noch Platzhalter und werden ergänzt.')}</p>
       <div class="pgrid">${SWEAT4_SYSTEM.map(t => WorkoutPlanCard(t, cid, plan && plan.templateId === t.id)).join('')}</div></main>`;
+  }
+  /* Rack (3D, drehbar) + Übungen am Rack – oben auf der Programm-Seite */
+  function RackShowcase() {
+    const exs = ['tbar-schulterdruecken', 'tbar-front-squat'].map(id => KAT().find(e => e.id === id)).filter(Boolean);
+    setTimeout(() => { const h = document.getElementById('park-r3'); if (h && window.ParkDemo && ParkDemo.mountRack) ParkDemo.mountRack(h); }, 0);
+    return `<section class="park-r3-sec" aria-label="${T('Das Sweat4 Rack')}">
+      <div class="park-r3" id="park-r3"><img class="park-r3-poster" src="rack-vorschau.jpg" alt="${T('Das Sweat4 Rack')}">
+        <span class="park-r3-tag">${ic('cube', 14)} ${T('3D · zum Drehen wischen')}</span></div>
+      <div class="park-r3-cap"><b>${T('Das Sweat4 Rack')}</b><span>${T('3D-Visualisierung des geplanten Racks')}</span></div>
+      ${exs.length ? `<div class="section-h" style="margin-top:14px"><h2>${T('Übungen am Rack')}</h2></div><div class="xgrid park-r3-ex">${exs.map(ExerciseCard).join('')}</div>` : ''}
+      <div class="section-h" style="margin-top:18px"><h2>${T('Trainingsprogramme')}</h2></div></section>`;
   }
   function rackSvg(sel) {
     const areas = RACK.areas || [];
@@ -472,6 +517,20 @@
   .park-zone b{font-size:22px;color:var(--accent)}.park-zone span{font-size:12px;color:var(--muted)}
   .park-zone.on,.park-zone:hover{border-color:var(--accent);background:var(--accent-soft)}
   .kat-figrow{display:none!important}
+.park-r3-sec{margin:0 0 6px}
+  .park-r3{position:relative;aspect-ratio:16/10;border-radius:18px;overflow:hidden;background:#060606;border:1px solid var(--line, #ffffff1a)}
+  .park-r3-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .5s}
+  .park-r3.ready .park-r3-poster{opacity:0;pointer-events:none}
+  .park-r3-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
+  .park-r3-tag{position:absolute;z-index:2;left:10px;bottom:10px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#f2efe9;background:#0b0b0bb3;border:1px solid #ffffff22;border-radius:999px;padding:5px 10px;pointer-events:none;backdrop-filter:blur(6px)}
+  .park-r3-tag svg{color:var(--accent)}.park-r3.nogl .park-r3-tag{display:none}
+  .park-r3-cap{display:flex;flex-direction:column;gap:2px;margin:10px 2px 0}.park-r3-cap span{font-size:13px;color:var(--muted, #a59f95)}
+  .park-ai{position:absolute;right:6px;top:6px;z-index:3;font-size:10px;font-weight:800;letter-spacing:.02em;color:#fff;background:#000000b3;border:1px solid #ffffff33;border-radius:6px;padding:3px 6px;pointer-events:none}
+  .park-ai-lg{right:10px;top:10px;font-size:12px;padding:4px 8px}
+  .park-demo-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;border:0;width:100%;cursor:pointer;color:#f2efe9;font:inherit;background:radial-gradient(circle at 50% 40%,#2a2419,#0b0b0b 70%)}
+  .park-demo-card b{font-size:17px}.park-demo-card span{font-size:13px;color:#a59f95;max-width:300px}
+  .park-demo-ic{color:var(--accent)!important}.park-demo-go{display:inline-flex;align-items:center;gap:8px;margin-top:6px;background:var(--accent);color:#111!important;font-weight:800;font-size:14px!important;border-radius:12px;padding:10px 16px}
+  .park-has3d .xprev-ph,.park-has3d .park-novid-t{color:var(--accent);opacity:1}
   .pz{margin:4px 0 22px}
   .pz-hero{position:relative;border-radius:22px;padding:22px 20px 20px;background:linear-gradient(150deg,#d4b074,#be9b5c 55%,#9c7c45);color:#111;box-shadow:0 10px 30px rgba(190,155,92,.25)}
   .pz-eyebrow{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
